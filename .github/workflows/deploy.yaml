@@ -1,0 +1,20 @@
+name: Deploy App
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+    - run: docker build -t codingmaven1/test-react -f ./client/Dockerfile.dev ./client
+    - run: docker run -e CI=true codingmaven1/test-react npm test
+    - run: docker build -t codingmaven1/multi-app-client ./client
+    - run: docker build -t codingmaven1/multi-app-nginx ./nginx
+    - run: docker build -t codingmaven1/multi-app-server ./server
+    - run: docker build -t codingmaven1/multi-app-worker ./worker
+    - run: docker push codingmaven1/multi-app-client
+    - run: docker push codingmaven1/multi-app-nginx
+    - run: docker push codingmaven1/multi-app-server
+    - run: docker push codingmaven1/multi-app-worker
