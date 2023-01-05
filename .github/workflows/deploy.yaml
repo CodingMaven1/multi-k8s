@@ -20,3 +20,18 @@ jobs:
       - run: docker push codingmaven1/multi-app-nginx
       - run: docker push codingmaven1/multi-app-server
       - run: docker push codingmaven1/multi-app-worker
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+ 
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v18
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: docker-multi
+          environment_name: Dockermulti-env
+          existing_bucket_name: elasticbeanstalk-ap-south-1-824815708558
+          region: ap-south-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
